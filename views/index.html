@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Chat</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/contactus">Contact Us</a></li>
+    </ul>
+  </nav>
+
+  <h1>Simple Chat</h1>
+  <div id="chat">
+    <div id="messages"></div>
+    <form id="loginForm">
+      <input type="text" id="usernameInput" placeholder="Enter your username..." required>
+      <button type="submit">Login</button>
+    </form>
+    <form id="messageForm" style="display: none;">
+      <input type="text" id="messageInput" placeholder="Type your message..." required>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const messagesContainer = document.getElementById('messages');
+    const loginForm = document.getElementById('loginForm');
+    const usernameInput = document.getElementById('usernameInput');
+    const messageForm = document.getElementById('messageForm');
+    const messageInput = document.getElementById('messageInput');
+
+    // Function to add a new message to the chat
+    function addMessage(message) {
+      const messageElement = document.createElement('div');
+      messageElement.textContent = message;
+      messagesContainer.appendChild(messageElement);
+    }
+
+    // Function to fetch and display existing messages
+    async function fetchMessages() {
+      const response = await fetch('/messages');
+      const messages = await response.json();
+      messages.forEach(addMessage);
+    }
+
+    // Event listener for the login form submission
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = usernameInput.value;
+      if (username) {
+        await fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username }),
+        });
+        loginForm.style.display = 'none';
+        messageForm.style.display = 'block';
+        fetchMessages();
+      }
+    });
+
+    // Event listener for the message form submission
+    messageForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = messageInput.value;
+      if (message) {
+        await fetch('/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message }),
+        });
+        messageInput.value = '';
+      }
+    });
+
+    // Fetch and display messages on page load
+    fetchMessages();
+  </script>
+</body>
+</html>
